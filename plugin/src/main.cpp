@@ -9,6 +9,7 @@
 #include <ssengine/render/resources.h>
 
 #include "ss_drawable.h"
+#include <ssengine/render/drawbatch.h>
 
 ss_resource_ref* ss_spine_atlas_resource(ss_core_context* C, const char* uri);
 ss_resource_ref* ss_spine_skeleton_resource(ss_core_context* C, const char* _uri);
@@ -24,6 +25,17 @@ static int spine_drawable_mt_gc(lua_State *L){
     return 0;
 }
 
+static int spine_drawable_update(lua_State *L){
+    lua_check_drawable(L, 1)->update((float)luaL_checknumber(L, 2));
+    return 0;
+}
+
+static int spine_drawable_draw(lua_State *L){
+    lua_check_drawable(L, 1)->draw(ss_lua_check_render2d_context(L, 2));
+    return 0;
+}
+
+
 static int lua_create_spine_drawable(lua_State* L){
     struct ss_resource_ref* res = ss_lua_check_resource_ref(L, 1);
     if (res->prototype->typetag != ss_spine_skeleton_resource_typetag()){
@@ -35,6 +47,8 @@ static int lua_create_spine_drawable(lua_State* L){
     if (luaL_newmetatable(L, "spine.Drawable") == 1){
         luaL_reg resource_methods[] = {
             { "__gc", spine_drawable_mt_gc },
+            { "update", spine_drawable_update },
+            { "draw", spine_drawable_draw },
             { NULL, NULL }
         };
 

@@ -65,6 +65,8 @@ typedef struct spSkeletonData {
 
 	int ikConstraintsCount;
 	spIkConstraintData** ikConstraints;
+
+    void* userData;
 } spSkeletonData;
 
 spSkeletonData* spSkeletonData_create ();

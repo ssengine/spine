@@ -41,9 +41,11 @@ void ss_spine_drawable::update(float deltaTime) {
 
 //TODO: use index buffer to reduce memory usage and improve performance.
 
-void ss_spine_drawable::draw() const{
+void ss_spine_drawable::draw(render2d_context* RC) const{
     ss_core_context* C = C_;
     ss_draw_batch* db = ss_core_get_draw_batch(C);
+
+    const ss_matrix& m = RC->matrix_stack.top();
 
     float worldVertices[MAX_VERTEX_COUNT * 2];
 
@@ -84,16 +86,16 @@ void ss_spine_drawable::draw() const{
                     skeleton->b * slot->b, 
                     skeleton->a * slot->a);
 
-            db->pos(0) = db->pos(3) = ss::float2(worldVertices[SP_VERTEX_X1], worldVertices[SP_VERTEX_Y1]);
+            db->pos(0) = db->pos(3) = m.transpose(ss::float2(worldVertices[SP_VERTEX_X1], worldVertices[SP_VERTEX_Y1]));
             db->texcoord(0) = db->texcoord(3) = ss::float2(regionAttachment->uvs[SP_VERTEX_X1], regionAttachment->uvs[SP_VERTEX_Y1]);
 
-            db->pos(1) = ss::float2(worldVertices[SP_VERTEX_X2], worldVertices[SP_VERTEX_Y2]);
+            db->pos(1) = m.transpose(ss::float2(worldVertices[SP_VERTEX_X2], worldVertices[SP_VERTEX_Y2]));
             db->texcoord(1) = ss::float2(regionAttachment->uvs[SP_VERTEX_X2], regionAttachment->uvs[SP_VERTEX_Y2]);
 
-            db->pos(2) = db->pos(4) = ss::float2(worldVertices[SP_VERTEX_X3], worldVertices[SP_VERTEX_Y3]);
-            db->texcoord(0) = db->texcoord(3) = ss::float2(regionAttachment->uvs[SP_VERTEX_X3], regionAttachment->uvs[SP_VERTEX_Y3]);
+            db->pos(2) = db->pos(4) = m.transpose(ss::float2(worldVertices[SP_VERTEX_X3], worldVertices[SP_VERTEX_Y3]));
+            db->texcoord(2) = db->texcoord(4) = ss::float2(regionAttachment->uvs[SP_VERTEX_X3], regionAttachment->uvs[SP_VERTEX_Y3]);
 
-            db->pos(5) = ss::float2(worldVertices[SP_VERTEX_X4], worldVertices[SP_VERTEX_Y4]);
+            db->pos(5) = m.transpose(ss::float2(worldVertices[SP_VERTEX_X4], worldVertices[SP_VERTEX_Y4]));
             db->texcoord(5) = ss::float2(regionAttachment->uvs[SP_VERTEX_X4], regionAttachment->uvs[SP_VERTEX_Y4]);
         }
         else if (attachment->type == SP_ATTACHMENT_MESH) {
@@ -122,7 +124,7 @@ void ss_spine_drawable::draw() const{
             for (int i = 0; i < mesh->trianglesCount; ++i) {
                 int index = mesh->triangles[i] << 1;
                 db->diffuse(i) = color;
-                db->pos(i) = ss::float2(worldVertices[index], worldVertices[index + 1]);
+                db->pos(i) = m.transpose(ss::float2(worldVertices[index], worldVertices[index + 1]));
                 db->texcoord(i) = ss::float2(mesh->uvs[index], mesh->uvs[index + 1]);
             }
         }
@@ -147,7 +149,7 @@ void ss_spine_drawable::draw() const{
             for (int i = 0; i < mesh->trianglesCount; ++i) {
                 int index = mesh->triangles[i] << 1;
                 db->diffuse(i) = color;
-                db->pos(i) = ss::float2(worldVertices[index], worldVertices[index + 1]);
+                db->pos(i) = m.transpose(ss::float2(worldVertices[index], worldVertices[index + 1]));
                 db->texcoord(i) = ss::float2(mesh->uvs[index], mesh->uvs[index + 1]);
             }
         }

@@ -32,9 +32,11 @@ static int (spine_skeleton_sync_load)(ss_core_context* C, ss_resource_ref* ref){
     spAtlas* atlas = (spAtlas*)ref_atlas->ptr;
 
     spSkeletonJson* json = spSkeletonJson_create(atlas);
-    ref->ptr = spSkeletonJson_readSkeletonDataFile(C, json, _uri.c_str());
+    spSkeletonData* data = spSkeletonJson_readSkeletonDataFile(C, json, _uri.c_str());
+    data->userData = ref_atlas;
+    ref->ptr = data;
 
-    ss_resource_release(C, ref_atlas);
+    //ss_resource_release(C, ref_atlas);
 
     spSkeletonJson_dispose(json);
     return ref->ptr ? 0 : -1;
@@ -42,7 +44,9 @@ static int (spine_skeleton_sync_load)(ss_core_context* C, ss_resource_ref* ref){
 
 static void (spine_skeleton_unload)(ss_core_context* C, ss_resource_ref* ref){
     if (ref->ptr){
-        spSkeletonData_dispose((spSkeletonData*)ref->ptr);
+        spSkeletonData* data = (spSkeletonData*)ref->ptr;
+        ss_resource_release(C, (ss_resource_ref*)data->userData);
+        spSkeletonData_dispose(data);
         ref->ptr = nullptr;
     }
 }
